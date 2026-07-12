@@ -668,9 +668,10 @@ fun ExploreTabScreen(viewModel: DubbingViewModel) {
                                 )
                                 Canvas(modifier = Modifier.width(60.dp).height(24.dp)) {
                                     val count = 8
-                                    val spacing = size.width / count
+                                    val spacing = size.width / (count - 1).coerceAtLeast(1)
                                     for (i in 0 until count) {
-                                        val h = size.height * (0.2f + 0.8f * Random.nextFloat() * waveAnim)
+                                        val waveMultiplier = 0.3f + 0.7f * kotlin.math.sin(i.toFloat() * 1.0f + waveAnim * 2f * Math.PI.toFloat())
+                                        val h = size.height * waveMultiplier.coerceIn(0.1f, 1.0f)
                                         drawLine(
                                             color = GlowingAqua,
                                             start = Offset(i * spacing, (size.height - h) / 2),
