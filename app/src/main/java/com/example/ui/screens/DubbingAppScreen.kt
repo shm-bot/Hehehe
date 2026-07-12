@@ -655,31 +655,9 @@ fun ExploreTabScreen(viewModel: DubbingViewModel) {
                             }
 
                             if (previewingVoice == viewModel.selectedVoice) {
-                                // Waveform Canvas Animation
-                                val infiniteTransition = rememberInfiniteTransition(label = "wave")
-                                val waveAnim by infiniteTransition.animateFloat(
-                                    initialValue = 0f,
-                                    targetValue = 1f,
-                                    animationSpec = infiniteRepeatable(
-                                        animation = tween(1200, easing = LinearEasing),
-                                        repeatMode = RepeatMode.Reverse
-                                    ),
-                                    label = "wave"
+                                AnimatedWaveformVisualizer(
+                                    modifier = Modifier.width(60.dp).height(24.dp)
                                 )
-                                Canvas(modifier = Modifier.width(60.dp).height(24.dp)) {
-                                    val count = 8
-                                    val spacing = size.width / (count - 1).coerceAtLeast(1)
-                                    for (i in 0 until count) {
-                                        val waveMultiplier = 0.3f + 0.7f * kotlin.math.sin(i.toFloat() * 1.0f + waveAnim * 2f * Math.PI.toFloat())
-                                        val h = size.height * waveMultiplier.coerceIn(0.1f, 1.0f)
-                                        drawLine(
-                                            color = GlowingAqua,
-                                            start = Offset(i * spacing, (size.height - h) / 2),
-                                            end = Offset(i * spacing, (size.height + h) / 2),
-                                            strokeWidth = 3f
-                                        )
-                                    }
-                                }
                             }
                         }
                     }
@@ -1269,46 +1247,11 @@ fun PlayerTabScreen(viewModel: DubbingViewModel) {
                     contentAlignment = Alignment.Center
                 ) {
                     // Futuristic Graphic Equalizer acting as the background video simulation
-                    val infiniteTransition = rememberInfiniteTransition(label = "viz")
-                    val vizAnim by infiniteTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 1f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(800, easing = LinearEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "viz"
+                    FuturisticEqualizer(
+                        isPlaying = viewModel.isPlaying,
+                        selectedAudioTrack = viewModel.selectedAudioTrack,
+                        modifier = Modifier.fillMaxSize()
                     )
-
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val barCount = 15
-                        val barWidth = size.width / (barCount * 1.5f)
-                        val barSpacing = barWidth * 0.5f
-                        val totalWidth = (barWidth + barSpacing) * barCount
-                        val startX = (size.width - totalWidth) / 2
-
-                        // Draw background ambient grid lines
-                        drawRect(
-                            brush = Brush.radialGradient(
-                                colors = listOf(DeepSurface.copy(alpha = 0.5f), Color.Black),
-                                center = center,
-                                radius = size.minDimension
-                            )
-                        )
-
-                        if (viewModel.isPlaying) {
-                            for (i in 0 until barCount) {
-                                val randomMultiplier = 0.2f + 0.8f * kotlin.math.sin(i.toFloat() * 0.5f + vizAnim * 6f)
-                                val barHeight = size.height * 0.5f * randomMultiplier.coerceIn(0.1f, 0.9f)
-                                val x = startX + i * (barWidth + barSpacing)
-                                drawRect(
-                                    color = if (viewModel.selectedAudioTrack == "DUBBED") NeonCyan.copy(alpha = 0.4f) else NeonOrchid.copy(alpha = 0.4f),
-                                    topLeft = Offset(x, (size.height - barHeight) / 2),
-                                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
-                                )
-                            }
-                        }
-                    }
 
                     // Display Current Video Subtitles in large cinematic overlay!
                     val activeSubText = if (viewModel.currentSubtitleIndex >= 0 && viewModel.currentSubtitleIndex < viewModel.activeSubtitlesList.size) {
@@ -1794,11 +1737,88 @@ fun HistoryTabScreen(viewModel: DubbingViewModel) {
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text("فتح وتشغيل في المشغل التفاعلي", color = ObsidianBackground, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
-                            }
-                        }
-                    }
-                }
+                             }
+                         }
+                     }
+                 }
+             }
+         }
+     }
+ }
+
+@Composable
+fun AnimatedWaveformVisualizer(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "wave")
+    val waveAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "wave"
+    )
+    Canvas(modifier = modifier) {
+        val count = 8
+        val spacing = size.width / (count - 1).coerceAtLeast(1)
+        for (i in 0 until count) {
+            val waveMultiplier = 0.3f + 0.7f * kotlin.math.sin(i.toFloat() * 1.0f + waveAnim * 2f * Math.PI.toFloat())
+            val h = size.height * waveMultiplier.coerceIn(0.1f, 1.0f)
+            drawLine(
+                color = GlowingAqua,
+                start = Offset(i * spacing, (size.height - h) / 2),
+                end = Offset(i * spacing, (size.height + h) / 2),
+                strokeWidth = 3f
+            )
+        }
+    }
+}
+
+@Composable
+fun FuturisticEqualizer(
+    isPlaying: Boolean,
+    selectedAudioTrack: String,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "viz")
+    val vizAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "viz"
+    )
+
+    Canvas(modifier = modifier) {
+        val barCount = 15
+        val barWidth = size.width / (barCount * 1.5f)
+        val barSpacing = barWidth * 0.5f
+        val totalWidth = (barWidth + barSpacing) * barCount
+        val startX = (size.width - totalWidth) / 2
+
+        // Draw background ambient grid lines
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(DeepSurface.copy(alpha = 0.5f), Color.Black),
+                center = center,
+                radius = size.minDimension
+            )
+        )
+
+        if (isPlaying) {
+            for (i in 0 until barCount) {
+                val randomMultiplier = 0.2f + 0.8f * kotlin.math.sin(i.toFloat() * 0.5f + vizAnim * 6f)
+                val barHeight = size.height * 0.5f * randomMultiplier.coerceIn(0.1f, 0.9f)
+                val x = startX + i * (barWidth + barSpacing)
+                drawRect(
+                    color = if (selectedAudioTrack == "DUBBED") NeonCyan.copy(alpha = 0.4f) else NeonOrchid.copy(alpha = 0.4f),
+                    topLeft = Offset(x, (size.height - barHeight) / 2),
+                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
+                )
             }
         }
     }
 }
+
